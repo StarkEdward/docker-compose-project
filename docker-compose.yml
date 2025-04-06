@@ -1,48 +1,70 @@
-version : "3.8"
+# Specify the version of Docker Compose syntax to use
+version: "3.8"
 
 services:
+  # --- MySQL Service ---
   mysql:
-    container_name: mysql
-    image: mysql
+    container_name: mysql  # Sets a custom name for the MySQL container
+    image: mysql  # Uses the official MySQL image from Docker Hub
+
     environment:
-      MYSQL_DATABASE: "devops"
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "devops"  # Creates a default database named 'devops'
+      MYSQL_ROOT_PASSWORD: "root"  # Sets the MySQL root password to 'root'
+
     ports:
-      - "3306:3306"
+      - "3306:3306"  # Maps host port 3306 to container port 3306 (default MySQL port)
+
     volumes:
-      - /home/ubuntu/volume/mysql-data:/var/lib/mysql
+      - /home/ubuntu/volume/mysql-data:/var/lib/mysql  
+      # Mounts host directory to persist MySQL data even if the container is deleted
+
     networks:
-      - two-tier
-    restart: always
+      - two-tier  # Connects this container to the custom network named 'two-tier'
+
+    restart: always  # Automatically restarts the container if it crashes or stops
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
+      # Health check command to verify MySQL is accepting connections
+      interval: 10s        # Run the health check every 10 seconds
+      timeout: 5s          # Wait up to 5 seconds for health check to complete
+      retries: 5           # Retry 5 times before marking container as unhealthy
+      start_period: 60s    # Give MySQL 60 seconds to start before beginning checks
 
+  # --- Flask Web App Service ---
   flask:
     build:
-      context: .
-    container_name: two-tier-backend
+      context: .  # Builds the Flask app image from the Dockerfile in the current directory
+
+    container_name: two-tier-backend  # Sets a custom name for the Flask container
+
     ports:
-      - "5000:5000"
+      - "5000:5000"  # Maps host port 5000 to container port 5000 (Flask default)
+
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_DB: devops
+      MYSQL_HOST: mysql          # Hostname of MySQL service (Docker will resolve this)
+      MYSQL_USER: root           # MySQL username
+      MYSQL_PASSWORD: root       # MySQL password
+      MYSQL_DB: devops           # Database to use
+
     networks:
-      - two-tier
+      - two-tier  # Connects to the same network as MySQL so they can communicate
+
     depends_on:
-      - mysql
-    restart: always
+      - mysql  # Ensures MySQL container starts before Flask
+
+    restart: always  # Restart the container automatically if it crashes or stops
+
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      # Health check using curl to see if Flask app responds at /health
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+
+# --- Define Custom Network ---
 networks:
   two-tier:
-    driver: bridge
+    driver: bridge  # Use default bridge networking to enable internal communication
+

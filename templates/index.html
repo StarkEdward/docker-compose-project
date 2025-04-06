@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App new🚀</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+        color: #00f0ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 600px;
+        width: 100%;
+        padding: 30px;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        text-align: center;
+    }
+
+    .container:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .messages {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: rgba(0, 255, 255, 0.1);
+        border-radius: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .messages p {
+        padding: 10px;
+        background: rgba(0, 255, 255, 0.15);
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 1rem;
+        color: #ccffff;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid rgba(0, 255, 255, 0.4);
+        background: rgba(0, 0, 0, 0.3);
+        color: #00f0ff;
+        border-radius: 8px;
+        font-size: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+        border-color: #00c6ff;
+        box-shadow: 0 0 12px rgba(0, 198, 255, 0.6);
+        outline: none;
+    }
+
+    input[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+        box-shadow: 0 0 20px rgba(0, 198, 255, 0.8);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+        }
+
+        input[type="text"], input[type="submit"] {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<body>
+    <div class="container">
+        <h1>Flask + MySQL App [2 tier] - Sagar 🔥</h1>
+
+        <div class="messages">
+            {% for message in messages %}
+                <p>{{ message[0] }}</p>
+            {% endfor %}
+        </div>
+
+        <form id="messageForm">
+            <input type="text" name="new_message" placeholder="Type your message..." required>
+            <input type="submit" value="Send">
+        </form>
+    </div>
+
+    <!-- jQuery for Smooth AJAX Requests -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#messageForm").on("submit", function(event) {
+                event.preventDefault(); // Prevent page reload
+
+                let messageInput = $("input[name='new_message']");
+                let message = messageInput.val().trim();
+
+                if (message === "") {
+                    alert("Message cannot be empty!");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/submit",
+                    type: "POST",
+                    data: { new_message: message },
+                    success: function(response) {
+                        if (response && response.message) {
+                            $(".messages").append("<p>" + response.message + "</p>");
+                            messageInput.val("");
+                        } else {
+                            console.error("Unexpected response format:", response);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error:", status, error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
